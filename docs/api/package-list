@@ -1,0 +1,9 @@
+
+org.descripter
+org.descripter.js
+org.descripter.js.api
+org.descripter.js.api.core
+org.descripter.js.api.global
+org.descripter.js.parse
+org.descripter.js.ss
+org.descripter.js.ss.parse

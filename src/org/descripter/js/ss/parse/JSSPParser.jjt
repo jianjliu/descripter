@@ -1,0 +1,134 @@
+
+/*
+ *  Descripter 1.0 - Java Script Engines
+ *  Copyright (C) 2010-2015  Jianjun Liu (J.J.Liu)
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+options {
+	BUILD_NODE_FILES = true;
+	FORCE_LA_CHECK = false;
+	JDK_VERSION = "1.6";
+	JAVA_UNICODE_ESCAPE = true;
+	UNICODE_INPUT = true;
+	MULTI = true;
+	NODE_CLASS = "AbstractNode";
+	NODE_DEFAULT_VOID = true;
+	NODE_PACKAGE = "org.descripter.js.ss.parse";
+	NODE_PREFIX = "JSSP";
+	NODE_SCOPE_HOOK = true;
+	NODE_USES_PARSER = true;
+	STATIC = false;
+	VISITOR = true;
+	VISITOR_DATA_TYPE = "Object";
+	VISITOR_RETURN_TYPE = "Object";
+	VISITOR_EXCEPTION = "";
+}
+
+PARSER_BEGIN(JSSPParser)
+
+package org.descripter.js.ss.parse;
+
+public class JSSPParser
+{
+	void jjtreeOpenNodeScope(Node n) {
+		((AbstractNode)n).firstToken = getToken(1);
+	}
+
+	void jjtreeCloseNodeScope(Node n) {
+		((AbstractNode)n).lastToken = getToken(0);
+	}
+}
+PARSER_END(JSSPParser)
+
+SPECIAL_TOKEN :
+{
+	< LF: "\n" >     /* Line Feed */
+|	< CR: "\r" >     /* Carriage Return */
+|	< LS: "\u2028" > /* Line separator */
+|	< PS: "\u2029" > /* Paragraph separator */
+}
+
+MORE [IGNORE_CASE] :
+{
+	"<%" : IN_SCRIPT
+|	"\"" : IN_DOUBLE_STRING
+|	"\'" : IN_SINGLE_STRING
+}
+
+<IN_SCRIPT> TOKEN :
+{
+	<SCRIPT: "%>" > : DEFAULT
+}
+
+<IN_DOUBLE_STRING> TOKEN :
+{
+	<DOUBLE_STRING: "\"" > : DEFAULT
+}
+
+<IN_SINGLE_STRING> TOKEN :
+{
+	<SINGLE_STRING: "\'" > : DEFAULT
+}
+
+<DEFAULT> TOKEN :
+{
+	<HTML:
+		(
+				 ~["<","\"","\'","\n","\r","\u2028","\u2029"]
+		|	("<" ~["%","\"","\'","\n","\r","\u2028","\u2029"])
+		)*
+	> : DEFAULT
+}
+
+<IN_DOUBLE_STRING,IN_SINGLE_STRING,IN_SCRIPT,DEFAULT> MORE :
+{
+	< ~[] >
+}
+
+JSSPPage Page() #Page :
+{}
+{
+  (
+    Script() | Html()
+  )*
+  < EOF >
+  {
+    return jjtThis;
+  }
+}
+
+void Script() #Script :
+{
+	Token t;
+}
+{
+(
+	t = < SCRIPT >
+)	{
+		jjtThis.jjtSetValue(t.image.substring(2, t.image.length() - 2));
+	}
+}
+
+void Html() #Html :
+{
+	Token t;}
+{
+(		t = < DOUBLE_STRING >
+	|	t = < SINGLE_STRING >
+	|	t = < HTML >
+)	{		jjtThis.jjtSetValue(t.image);
+	}
+}

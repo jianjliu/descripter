@@ -1,0 +1,8 @@
+Welcome to Descripter Libraries 1.0
+===================================
+Java Script Engines
+
+Descripter 1.0 is open source Java libraries released under GNU Public License version 3 (gpl-v3).
+
+This library requires JDK 1.6 (or above). If you find bugs and issues on these libraries, 
+please contact the author J.J.Liu at jianjunliu@126.com or check the web site http://www.descripter.org
